@@ -137,7 +137,7 @@ export default function AddPersonScreen() {
     return () => clearTimeout(debounceTimer);
   }, [personInfo.profileName]);
 
-  // Search for groups when group name changes (for existing person)
+  // Search for groups when group name changes
   useEffect(() => {
     const searchGroups = async () => {
       if (!selectedPersonId || groupInfo.groupName.length < 2) {
@@ -213,7 +213,6 @@ export default function AddPersonScreen() {
   };
 
   // Handle group selection from suggestions
-  // In the handleSelectGroup function (around line 264-267), update it to:
   const handleSelectGroup = async (group: Group) => {
     setGroupInfo({
       id: group.id,
@@ -523,7 +522,6 @@ export default function AddPersonScreen() {
   );
 
   // Render group suggestion item
-  // In the renderGroupSuggestion function (around line 460-490), update it to:
   const renderGroupSuggestion = ({ item }: { item: Group }) => (
     <TouchableOpacity
       style={styles.suggestionItem}
@@ -543,7 +541,6 @@ export default function AddPersonScreen() {
     </TouchableOpacity>
   );
 
-  // And in the FlatList for group suggestions (around line 530-540):
   <FlatList
     data={groupSuggestions}
     renderItem={renderGroupSuggestion}
@@ -637,7 +634,7 @@ export default function AddPersonScreen() {
               placeholder="Enter profile ID"
               value={personInfo.profileId}
               onChangeText={(text) => setPersonInfo(prev => ({ ...prev, profileId: text }))}
-              editable={!selectedPersonId} // Disable if person is selected from suggestions
+              editable={!selectedPersonId} 
             />
             {errors.profileId && (
               <Text style={styles.errorText}>{errors.profileId}</Text>

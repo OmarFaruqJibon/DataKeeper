@@ -12,7 +12,6 @@ const api = axios.create({
 // Request interceptor for adding auth token
 api.interceptors.request.use(
   async (config) => {
-    // You can add token here if needed
     return config;
   },
   (error) => {
@@ -41,7 +40,6 @@ export const personService = {
     return response.data;
   },
   getAllPersons: async (userId: string) => {
-    // Use the new endpoint
     const response = await api.get(API_ENDPOINTS.ALL_PERSONS, {
       params: { userId },
     });
@@ -81,7 +79,6 @@ export const groupService = {
     });
     return response.data;
   },
-  // Add this method to get posts for a specific group
   getPosts: async (personId: string, groupId: string, userId: string) => {
     const response = await api.get(API_ENDPOINTS.POSTS, {
       params: { personId, groupId, userId },
