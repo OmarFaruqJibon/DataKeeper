@@ -1,6 +1,7 @@
 // config.ts
 // const API_BASE_URL = "http://10.0.2.2/data";
-const API_BASE_URL = "http://192.168.68.134/data";
+// const API_BASE_URL = "http://192.168.68.134/data";
+const API_BASE_URL = "https://nexovisionai.com/data";
 
 export const API_ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/login.php`,

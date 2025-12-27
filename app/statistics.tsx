@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
     },
     header: {
         backgroundColor: 'white',
-        paddingTop: 45,
+        paddingTop: 20,
         paddingBottom: 20,
         paddingHorizontal: 20,
         flexDirection: 'row',
