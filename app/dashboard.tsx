@@ -78,9 +78,9 @@ export default function DashboardScreen() {
       // Get all persons
       const personsResponse = await personService.getAllPersons(userId);
       if (personsResponse.success) {
-        // Sort by created_at (newest first)
+        // Sort by created_at 
         const sortedPersons = personsResponse.persons.sort((a: Person, b: Person) => {
-          return parseInt(b.id) - parseInt(a.id); // Assuming higher ID = newer
+          return parseInt(b.id) - parseInt(a.id); 
         });
         setAllPersons(sortedPersons);
         setFilteredPersons(sortedPersons.slice(0, 10));
