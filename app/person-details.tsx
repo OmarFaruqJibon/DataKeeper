@@ -166,7 +166,7 @@ export default function PersonDetailsScreen() {
             <User size={48} color="#d1d5db" />
           </View>
           <Text style={styles.errorTitle}>Person not found</Text>
-          <Text style={styles.errorText}>The person you're looking for doesn't exist</Text>
+          <Text style={styles.errorText}>The person you are looking for does not exist</Text>
           <TouchableOpacity
             style={styles.errorButton}
             onPress={() => router.back()}
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'white',
-    paddingTop: 60,
+    paddingTop: 45,
     paddingBottom: 20,
     paddingHorizontal: 20,
     flexDirection: 'row',

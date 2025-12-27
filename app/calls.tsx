@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'white',
-    paddingTop: 60,
+    paddingTop: 45,
     paddingBottom: 20,
     paddingHorizontal: 20,
     flexDirection: 'row',

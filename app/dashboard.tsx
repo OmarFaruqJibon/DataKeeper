@@ -56,7 +56,6 @@ export default function DashboardScreen() {
         setFilteredPersons(allPersons.slice(0, 5));
       }
     } else {
-      // Has search query - filter all persons
       const filtered = allPersons.filter(person =>
         person.profile_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         person.profile_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -211,7 +210,7 @@ export default function DashboardScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View>
-            <Text style={styles.greeting}>Welcome back,</Text>
+            <Text style={styles.greeting}>Welcome,</Text>
             <Text style={styles.userName}>{userName}</Text>
           </View>
           <TouchableOpacity
@@ -358,7 +357,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'white',
-    paddingTop: 60,
+    paddingTop: 45,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 24,

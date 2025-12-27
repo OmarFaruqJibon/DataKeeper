@@ -1,9 +1,15 @@
 import { Stack } from "expo-router";
+import { StatusBar } from "react-native";
 import { PaperProvider } from 'react-native-paper';
 
 export default function RootLayout() {
   return (
     <PaperProvider>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#ffffff"
+        translucent={false}
+      />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
