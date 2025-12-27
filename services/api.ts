@@ -9,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for adding auth token
 api.interceptors.request.use(
   async (config) => {
     return config;
@@ -130,6 +129,29 @@ export const dataService = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+    });
+    return response.data;
+  },
+};
+
+export const statisticsService = {
+  getOverview: async (userId: string) => {
+    const response = await api.get(API_ENDPOINTS.STATISISTICS_OVERVIEW, {
+      params: { userId },
+    });
+    return response.data;
+  },
+  
+  getMonthlyData: async (userId: string, period: string) => {
+    const response = await api.get(API_ENDPOINTS.STATISISTICS_MONTHLY, {
+      params: { userId, period },
+    });
+    return response.data;
+  },
+  
+  getDemographics: async (userId: string) => {
+    const response = await api.get(API_ENDPOINTS.STATISISTICS_DEMOGRAPHICS, {
+      params: { userId },
     });
     return response.data;
   },

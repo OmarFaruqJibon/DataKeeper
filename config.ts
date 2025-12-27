@@ -12,6 +12,10 @@ export const API_ENDPOINTS = {
   SAVE_DATA: `${API_BASE_URL}/save-data.php`,
   UPLOADS: `${API_BASE_URL}/uploads/profile_pics/`,
   ALL_PERSONS: `${API_BASE_URL}/get-all-persons.php`,
+  STATISISTICS_OVERVIEW: `${API_BASE_URL}/statistics-overview.php`,
+  STATISISTICS_MONTHLY: `${API_BASE_URL}/statistics-monthly.php`,
+  STATISISTICS_DEMOGRAPHICS: `${API_BASE_URL}/statistics-demographics.php`,
+
 };
 
 export default API_ENDPOINTS;

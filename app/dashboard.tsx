@@ -1,7 +1,7 @@
 // app/dashboard.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { Briefcase, Calendar, ChevronRight, Hash, LogOut, MessageSquare, Phone, PhoneCall, Plus, Search, User, Users } from 'lucide-react-native';
+import { BarChart3, Briefcase, Calendar, ChevronRight, Hash, LogOut, Phone, Plus, Search, User } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -44,14 +44,19 @@ export default function DashboardScreen() {
     loadDashboardData();
   }, []);
 
+  // Update the filtering logic
   useEffect(() => {
     if (searchQuery.trim() === '') {
+      // No search query
       if (showAll) {
+        // Show all persons
         setFilteredPersons(allPersons);
       } else {
-        setFilteredPersons(allPersons.slice(0, 10));
+        // Show only recent persons
+        setFilteredPersons(allPersons.slice(0, 5));
       }
     } else {
+      // Has search query - filter all persons
       const filtered = allPersons.filter(person =>
         person.profile_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         person.profile_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -78,12 +83,13 @@ export default function DashboardScreen() {
       // Get all persons
       const personsResponse = await personService.getAllPersons(userId);
       if (personsResponse.success) {
-        // Sort by created_at 
+        // Sort by ID 
         const sortedPersons = personsResponse.persons.sort((a: Person, b: Person) => {
-          return parseInt(b.id) - parseInt(a.id); 
+          return parseInt(b.id) - parseInt(a.id);
         });
         setAllPersons(sortedPersons);
-        setFilteredPersons(sortedPersons.slice(0, 10));
+        setFilteredPersons(sortedPersons.slice(0, 5));
+        setShowAll(false);
       } else {
         console.log('No persons found or error:', personsResponse);
         setAllPersons([]);
@@ -119,6 +125,15 @@ export default function DashboardScreen() {
         },
       ]
     );
+  };
+
+  const handleToggleShowAll = () => {
+    setShowAll(!showAll);
+    setSearchQuery('');
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
   };
 
   const renderPersonItem = ({ item }: { item: Person }) => (
@@ -161,7 +176,7 @@ export default function DashboardScreen() {
         </View>
         <ChevronRight size={20} color="#9ca3af" />
       </View>
-      
+
       {item.occupation || item.age ? (
         <View style={styles.personCardFooter}>
           {item.occupation && (
@@ -180,12 +195,6 @@ export default function DashboardScreen() {
       ) : null}
     </TouchableOpacity>
   );
-
-  const stats = [
-    { label: 'Total Persons', value: allPersons.length, icon: Users, color: '#3b82f6' },
-    { label: 'Recent Activity', value: 'Today', icon: MessageSquare, color: '#10b981' },
-    { label: 'Pending Calls', value: '0', icon: PhoneCall, color: '#f59e0b' },
-  ];
 
   if (loading) {
     return (
@@ -212,7 +221,7 @@ export default function DashboardScreen() {
             <LogOut size={20} color="#fff" />
           </TouchableOpacity>
         </View>
-        
+
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <Search size={20} color="#9ca3af" style={styles.searchIcon} />
@@ -224,7 +233,7 @@ export default function DashboardScreen() {
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity onPress={handleClearSearch}>
               <Text style={styles.clearSearch}>Clear</Text>
             </TouchableOpacity>
           )}
@@ -239,8 +248,9 @@ export default function DashboardScreen() {
         }
       >
 
+
         {/* Quick Actions */}
-        <View style={{marginTop: 20}}></View>
+        <View style={{ marginTop: 20 }}></View>
         <View style={styles.section}>
           <View style={styles.actionsGrid}>
             <TouchableOpacity
@@ -254,16 +264,22 @@ export default function DashboardScreen() {
               <Text style={styles.actionSubtitle}>Create a new profile</Text>
             </TouchableOpacity>
 
-
             <TouchableOpacity
               style={styles.actionCard}
-              onPress={() => router.push('/groups')}
+              onPress={() => router.push('/statistics')}
+              // onPress={() =>
+              //   Alert.alert(
+              //     'Coming Soon',
+              //     'This feature will come soon.',
+              //     [{ text: 'OK' }]
+              //   )
+              // }
             >
-              <View style={[styles.actionIconContainer, { backgroundColor: '#f59e0b20' }]}>
-                <MessageSquare size={24} color="#f59e0b" />
+              <View style={[styles.actionIconContainer, { backgroundColor: '#10b98120' }]}>
+                <BarChart3 size={24} color="#10b981" />
               </View>
-              <Text style={styles.actionTitle}>Groups</Text>
-              <Text style={styles.actionSubtitle}>Manage groups</Text>
+              <Text style={styles.actionTitle}>Statistics</Text>
+              <Text style={styles.actionSubtitle}>View insights & analysis</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -275,10 +291,10 @@ export default function DashboardScreen() {
               {searchQuery ? 'Search Results' : showAll ? 'All Persons' : 'Recent Persons'}
               <Text style={styles.sectionCount}> ({filteredPersons.length})</Text>
             </Text>
-            {!searchQuery && (
+            {!searchQuery && allPersons.length > 5 && (
               <TouchableOpacity
                 style={styles.toggleButton}
-                onPress={() => setShowAll(!showAll)}
+                onPress={handleToggleShowAll}
               >
                 <Text style={styles.toggleButtonText}>
                   {showAll ? 'Show Less' : 'View All'}
@@ -408,44 +424,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    marginBottom: 24,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 4,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  statIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-    textAlign: 'center',
   },
   section: {
     marginBottom: 24,
