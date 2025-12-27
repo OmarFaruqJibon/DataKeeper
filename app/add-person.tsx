@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { Briefcase, Calendar, Camera, Hash, MapPin, Phone, Plus, Search, Upload, User, Users, X } from 'lucide-react-native';
+import { Briefcase, Calendar, Camera, ChevronLeft, FileText, Hash, MapPin, MessageSquare, Phone, Plus, Search, Upload, User, Users, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -493,7 +493,8 @@ export default function AddPersonScreen() {
     setGroupSuggestions([]);
   };
 
-  // Render person suggestion item
+
+
   const renderPersonSuggestion = ({ item }: { item: Person }) => (
     <TouchableOpacity
       style={styles.suggestionItem}
@@ -507,80 +508,94 @@ export default function AddPersonScreen() {
           />
         ) : (
           <View style={[styles.profileThumb, styles.placeholderThumb]}>
-            <User size={20} color="#666" />
+            <User size={18} color="#8b5cf6" />
           </View>
         )}
         <View style={styles.suggestionText}>
           <Text style={styles.suggestionName}>{item.profile_name}</Text>
-          <Text style={styles.suggestionId}>ID: {item.profile_id}</Text>
-          {item.phone_number && (
-            <Text style={styles.suggestionPhone}>{item.phone_number}</Text>
-          )}
+          <View style={styles.suggestionMeta}>
+            <Text style={styles.suggestionId}>ID: {item.profile_id}</Text>
+            {item.phone_number && (
+              <Text style={styles.suggestionPhone}>• {item.phone_number}</Text>
+            )}
+          </View>
+        </View>
+        <View style={styles.suggestionArrow}>
+          <ChevronLeft size={16} color="#9ca3af" style={{ transform: [{ rotate: '180deg' }] }} />
         </View>
       </View>
     </TouchableOpacity>
   );
 
-  // Render group suggestion item
   const renderGroupSuggestion = ({ item }: { item: Group }) => (
     <TouchableOpacity
       style={styles.suggestionItem}
       onPress={() => handleSelectGroup(item)}
     >
       <View style={styles.suggestionContent}>
-        <View style={[styles.groupThumb, { backgroundColor: '#10b981' }]}>
-          <Users size={20} color="white" />
+        <View style={[styles.groupThumb]}>
+          <Users size={18} color="#10b981" />
         </View>
         <View style={styles.suggestionText}>
           <Text style={styles.suggestionName}>{item.group_name}</Text>
           {item.note && (
-            <Text style={styles.suggestionNote}>{item.note}</Text>
+            <Text style={styles.suggestionNote} numberOfLines={1}>{item.note}</Text>
           )}
+        </View>
+        <View style={styles.suggestionArrow}>
+          <ChevronLeft size={16} color="#9ca3af" style={{ transform: [{ rotate: '180deg' }] }} />
         </View>
       </View>
     </TouchableOpacity>
   );
 
-  <FlatList
-    data={groupSuggestions}
-    renderItem={renderGroupSuggestion}
-    keyExtractor={(item) => item.id}
-    style={styles.suggestionsList}
-    nestedScrollEnabled
-  />
-
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Add New Person</Text>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backButton}>Back</Text>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ChevronLeft size={24} color="#1f2937" />
           </TouchableOpacity>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>Add New Person</Text>
+            <Text style={styles.headerSubtitle}>Create or select existing profile</Text>
+          </View>
+          <View style={{ width: 40 }} />
         </View>
+      </View>
 
-        {/* Person Information Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View style={[styles.iconContainer, { backgroundColor: '#3b82f6' }]}>
-              <User size={24} color="white" />
+      <ScrollView 
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Person Information Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.cardIcon, { backgroundColor: '#8b5cf6' }]}>
+              <User size={20} color="white" />
             </View>
-            <View>
-              <Text style={styles.sectionTitle}>Person Information</Text>
-              <Text style={styles.sectionSubtitle}>Enter or search for Facebook profile</Text>
+            <View style={styles.cardHeaderContent}>
+              <Text style={styles.cardTitle}>Person Information</Text>
+              <Text style={styles.cardSubtitle}>Enter or search Facebook profile details</Text>
             </View>
           </View>
 
           {/* Profile Name with Suggestions */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              <Search size={16} color="#4b5563" /> Profile Name *
-            </Text>
-            <View>
+          <View style={styles.formGroup}>
+            <View style={styles.labelContainer}>
+              <Search size={16} color="#8b5cf6" />
+              <Text style={styles.label}>Profile Name *</Text>
+            </View>
+            <View style={styles.inputContainer}>
               <TextInput
                 style={[styles.input, errors.profileName && styles.inputError]}
-                placeholder="Search Facebook profile..."
+                placeholder="Search by name..."
+                placeholderTextColor="#9ca3af"
                 value={personInfo.profileName}
                 onChangeText={(text) => {
                   setPersonInfo(prev => ({ ...prev, profileName: text }));
@@ -601,11 +616,11 @@ export default function AddPersonScreen() {
                     setShowPersonSuggestions(false);
                   }}
                 >
-                  <X size={20} color="#9ca3af" />
+                  <X size={18} color="#9ca3af" />
                 </TouchableOpacity>
               )}
             </View>
-
+            
             {/* Person Suggestions */}
             {showPersonSuggestions && personSuggestions.length > 0 && (
               <View style={styles.suggestionsContainer}>
@@ -615,146 +630,179 @@ export default function AddPersonScreen() {
                   keyExtractor={(item) => item.id}
                   style={styles.suggestionsList}
                   nestedScrollEnabled
+                  showsVerticalScrollIndicator={false}
                 />
               </View>
             )}
-
+            
             {errors.profileName && (
-              <Text style={styles.errorText}>{errors.profileName}</Text>
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{errors.profileName}</Text>
+              </View>
             )}
           </View>
 
           {/* Profile ID */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              <Hash size={16} color="#4b5563" /> Profile ID *
-            </Text>
+          <View style={styles.formGroup}>
+            <View style={styles.labelContainer}>
+              <Hash size={16} color="#8b5cf6" />
+              <Text style={styles.label}>Profile ID *</Text>
+            </View>
             <TextInput
               style={[styles.input, errors.profileId && styles.inputError]}
-              placeholder="Enter profile ID"
+              placeholder="Enter unique profile ID"
+              placeholderTextColor="#9ca3af"
               value={personInfo.profileId}
               onChangeText={(text) => setPersonInfo(prev => ({ ...prev, profileId: text }))}
-              editable={!selectedPersonId} 
+              editable={!selectedPersonId}
             />
             {errors.profileId && (
-              <Text style={styles.errorText}>{errors.profileId}</Text>
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{errors.profileId}</Text>
+              </View>
             )}
           </View>
 
-          {/* Phone Number */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              <Phone size={16} color="#4b5563" /> Phone Number
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter phone number"
-              value={personInfo.phoneNumber}
-              onChangeText={(text) => setPersonInfo(prev => ({ ...prev, phoneNumber: text }))}
-              keyboardType="phone-pad"
-            />
+          {/* Two Column Layout for Phone and Age */}
+          <View style={styles.row}>
+            <View style={[styles.formGroup, { flex: 1, marginRight: 8 }]}>
+              <View style={styles.labelContainer}>
+                <Phone size={16} color="#8b5cf6" />
+                <Text style={styles.label}>Phone Number</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="+1 (555) 123-4567"
+                placeholderTextColor="#9ca3af"
+                value={personInfo.phoneNumber}
+                onChangeText={(text) => setPersonInfo(prev => ({ ...prev, phoneNumber: text }))}
+                keyboardType="phone-pad"
+              />
+            </View>
+
+            <View style={[styles.formGroup, { flex: 1, marginLeft: 8 }]}>
+              <View style={styles.labelContainer}>
+                <Calendar size={16} color="#8b5cf6" />
+                <Text style={styles.label}>Age</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter age"
+                placeholderTextColor="#9ca3af"
+                value={personInfo.age}
+                onChangeText={(text) => setPersonInfo(prev => ({ ...prev, age: text }))}
+                keyboardType="number-pad"
+              />
+            </View>
           </View>
 
           {/* Address */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              <MapPin size={16} color="#4b5563" /> Address
-            </Text>
+          <View style={styles.formGroup}>
+            <View style={styles.labelContainer}>
+              <MapPin size={16} color="#8b5cf6" />
+              <Text style={styles.label}>Address</Text>
+            </View>
             <TextInput
               style={styles.input}
-              placeholder="Enter address"
+              placeholder="Enter complete address"
+              placeholderTextColor="#9ca3af"
               value={personInfo.address}
               onChangeText={(text) => setPersonInfo(prev => ({ ...prev, address: text }))}
             />
           </View>
 
           {/* Occupation */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              <Briefcase size={16} color="#4b5563" /> Occupation
-            </Text>
+          <View style={styles.formGroup}>
+            <View style={styles.labelContainer}>
+              <Briefcase size={16} color="#8b5cf6" />
+              <Text style={styles.label}>Occupation</Text>
+            </View>
             <TextInput
               style={styles.input}
-              placeholder="Enter occupation"
+              placeholder="Enter profession or occupation"
+              placeholderTextColor="#9ca3af"
               value={personInfo.occupation}
               onChangeText={(text) => setPersonInfo(prev => ({ ...prev, occupation: text }))}
             />
           </View>
 
-          {/* Age */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              <Calendar size={16} color="#4b5563" /> Age
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter age"
-              value={personInfo.age}
-              onChangeText={(text) => setPersonInfo(prev => ({ ...prev, age: text }))}
-              keyboardType="number-pad"
-            />
-          </View>
-
           {/* Profile Picture */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              <Camera size={16} color="#4b5563" /> Profile Picture
-            </Text>
-            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+          <View style={styles.formGroup}>
+            <View style={styles.labelContainer}>
+              <Camera size={16} color="#8b5cf6" />
+              <Text style={styles.label}>Profile Picture</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.imagePicker} 
+              onPress={pickImage}
+              activeOpacity={0.7}
+            >
               {profilePreview ? (
-                <Image source={{ uri: profilePreview }} style={styles.imagePreview} />
+                <View style={styles.imagePreviewContainer}>
+                  <Image 
+                    source={{ uri: profilePreview }} 
+                    style={styles.imagePreview} 
+                  />
+                  <View style={styles.imageOverlay}>
+                    <Camera size={20} color="white" />
+                    <Text style={styles.imageOverlayText}>Change Photo</Text>
+                  </View>
+                </View>
               ) : (
                 <View style={styles.imagePlaceholder}>
-                  <Upload size={24} color="#9ca3af" />
-                  <Text style={styles.imagePlaceholderText}>Choose Image</Text>
+                  <Upload size={24} color="#8b5cf6" />
+                  <Text style={styles.imagePlaceholderText}>Choose Profile Image</Text>
+                  <Text style={styles.imagePlaceholderSubtext}>JPEG, PNG, GIF or WebP • Max 5MB</Text>
                 </View>
               )}
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Group Information Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-
-            <View style={[styles.iconContainer, { backgroundColor: '#10b981' }]}>
-              <Users size={24} color="white" />
+        {/* Group Information Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.cardIcon, { backgroundColor: '#10b981' }]}>
+              <Users size={20} color="white" />
+              
             </View>
-
-            <View>
-              <Text style={styles.sectionTitle}>Group Information</Text>
+            <View style={styles.cardHeaderContent}>
+              <Text style={styles.cardTitle}>Group Information</Text>
+              <Text style={styles.cardSubtitle}>Select existing group or create new</Text>
             </View>
-
-            <View style={styles.sectionActions}>
+            <View style={styles.cardActions}>
               <TouchableOpacity
-                style={[styles.actionButton, (!selectedPersonId && !personInfo.profileName.trim()) && styles.actionButtonDisabled]}
+                style={[styles.cardActionButton, (!selectedPersonId && !personInfo.profileName.trim()) && styles.cardActionButtonDisabled]}
                 onPress={() => setShowGroupModal(true)}
                 disabled={!selectedPersonId && !personInfo.profileName.trim()}
               >
-                <Plus size={18} color="white" />
-                <Text style={styles.actionButtonText}>New Group</Text>
+                <Plus size={16} color="white" />
+                <Text style={styles.cardActionButtonText}>New Group</Text>
               </TouchableOpacity>
 
               {groupInfo.id && selectedPersonId && (
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: '#8b5cf6' }]}
+                  style={[styles.cardActionButton, { backgroundColor: '#8b5cf6' }]}
                   onPress={() => setShowPostModal(true)}
                 >
-                  <Plus size={18} color="white" />
-                  <Text style={styles.actionButtonText}>New Post</Text>
+                  <MessageSquare size={16} color="white" />
+                  <Text style={styles.cardActionButtonText}>New Post</Text>
                 </TouchableOpacity>
               )}
             </View>
-            
           </View>
 
           {/* Group Selection */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Select Group</Text>
-            <View>
+          <View style={styles.formGroup}>
+            <View style={styles.labelContainer}>
+              <Users size={16} color="#10b981" />
+              <Text style={styles.label}>Select Group *</Text>
+            </View>
+            <View style={styles.inputContainer}>
               <TextInput
                 style={[styles.input, errors.groupName && styles.inputError]}
                 placeholder="Search or select group..."
+                placeholderTextColor="#9ca3af"
                 value={groupInfo.groupName}
                 onChangeText={(text) => {
                   setGroupInfo(prev => ({ ...prev, groupName: text, id: null }));
@@ -766,32 +814,39 @@ export default function AddPersonScreen() {
                   }
                 }}
               />
-
-              {/* Group Suggestions */}
-              {showGroupSuggestions && groupSuggestions.length > 0 && (
-                <View style={styles.suggestionsContainer}>
-                  <FlatList
-                    data={groupSuggestions}
-                    renderItem={renderGroupSuggestion}
-                    keyExtractor={(item) => item.id}
-                    style={styles.suggestionsList}
-                    nestedScrollEnabled
-                  />
-                </View>
-              )}
             </View>
 
+            {/* Group Suggestions */}
+            {showGroupSuggestions && groupSuggestions.length > 0 && (
+              <View style={styles.suggestionsContainer}>
+                <FlatList
+                  data={groupSuggestions}
+                  renderItem={renderGroupSuggestion}
+                  keyExtractor={(item) => item.id}
+                  style={styles.suggestionsList}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator={false}
+                />
+              </View>
+            )}
+
             {errors.groupName && (
-              <Text style={styles.errorText}>{errors.groupName}</Text>
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{errors.groupName}</Text>
+              </View>
             )}
           </View>
 
           {/* Group Note */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Group Note (Optional)</Text>
+          <View style={styles.formGroup}>
+            <View style={styles.labelContainer}>
+              <FileText size={16} color="#10b981" />
+              <Text style={styles.label}>Group Note (Optional)</Text>
+            </View>
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Add notes about this group..."
+              placeholderTextColor="#9ca3af"
               value={groupInfo.note}
               onChangeText={(text) => setGroupInfo(prev => ({ ...prev, note: text }))}
               multiline
@@ -802,9 +857,12 @@ export default function AddPersonScreen() {
           {/* Existing Posts */}
           {existingPosts.length > 0 && (
             <View style={styles.postsContainer}>
-              <Text style={styles.postsTitle}>
-                Existing Posts ({existingPosts.length})
-              </Text>
+              <View style={styles.postsHeader}>
+                <Text style={styles.postsTitle}>Existing Posts</Text>
+                <View style={styles.postsCount}>
+                  <Text style={styles.postsCountText}>{existingPosts.length}</Text>
+                </View>
+              </View>
               <FlatList
                 data={existingPosts}
                 renderItem={({ item }) => (
@@ -830,6 +888,7 @@ export default function AddPersonScreen() {
           style={[styles.submitButton, loading && styles.submitButtonDisabled]}
           onPress={handleSubmit}
           disabled={loading}
+          activeOpacity={0.8}
         >
           {loading ? (
             <ActivityIndicator color="white" />
@@ -839,69 +898,81 @@ export default function AddPersonScreen() {
             </>
           )}
         </TouchableOpacity>
-      </View>
+
+        <View style={styles.footerSpacer} />
+      </ScrollView>
 
       {/* Group Modal */}
       <Modal
         visible={showGroupModal}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setShowGroupModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Create New Group</Text>
-              <TouchableOpacity onPress={() => setShowGroupModal(false)}>
-                <X size={24} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalBody}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Facebook Group Name *</Text>
-                <TextInput
-                  style={[styles.input, errors.groupName && styles.inputError]}
-                  placeholder="Enter group name"
-                  value={groupInfo.groupName}
-                  onChangeText={(text) => setGroupInfo(prev => ({ ...prev, groupName: text }))}
-                />
-                {errors.groupName && (
-                  <Text style={styles.errorText}>{errors.groupName}</Text>
-                )}
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <View style={styles.modalIcon}>
+                  <Users size={24} color="#10b981" />
+                </View>
+                <Text style={styles.modalTitle}>Create New Group</Text>
+                <TouchableOpacity 
+                  style={styles.modalClose}
+                  onPress={() => setShowGroupModal(false)}
+                >
+                  <X size={24} color="#9ca3af" />
+                </TouchableOpacity>
               </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Notes (Optional)</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  placeholder="Add notes..."
-                  value={groupInfo.note}
-                  onChangeText={(text) => setGroupInfo(prev => ({ ...prev, note: text }))}
-                  multiline
-                  numberOfLines={3}
-                />
-              </View>
-            </View>
+              <View style={styles.modalBody}>
+                <View style={styles.formGroup}>
+                  <Text style={styles.modalLabel}>Facebook Group Name *</Text>
+                  <TextInput
+                    style={[styles.modalInput, errors.groupName && styles.inputError]}
+                    placeholder="Enter group name"
+                    placeholderTextColor="#9ca3af"
+                    value={groupInfo.groupName}
+                    onChangeText={(text) => setGroupInfo(prev => ({ ...prev, groupName: text }))}
+                  />
+                  {errors.groupName && (
+                    <Text style={styles.errorText}>{errors.groupName}</Text>
+                  )}
+                </View>
 
-            <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={styles.modalButtonSecondary}
-                onPress={() => setShowGroupModal(false)}
-              >
-                <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButtonPrimary, saving && styles.modalButtonDisabled]}
-                onPress={saveGroup}
-                disabled={saving}
-              >
-                {saving ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text style={styles.modalButtonPrimaryText}>Save Group</Text>
-                )}
-              </TouchableOpacity>
+                <View style={styles.formGroup}>
+                  <Text style={styles.modalLabel}>Notes (Optional)</Text>
+                  <TextInput
+                    style={[styles.modalInput, styles.modalTextArea]}
+                    placeholder="Add notes..."
+                    placeholderTextColor="#9ca3af"
+                    value={groupInfo.note}
+                    onChangeText={(text) => setGroupInfo(prev => ({ ...prev, note: text }))}
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButtonSecondary}
+                  onPress={() => setShowGroupModal(false)}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButtonPrimary, saving && styles.modalButtonDisabled]}
+                  onPress={saveGroup}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text style={styles.modalButtonPrimaryText}>Save Group</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -910,68 +981,78 @@ export default function AddPersonScreen() {
       {/* Post Modal */}
       <Modal
         visible={showPostModal}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setShowPostModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add New Post</Text>
-              <TouchableOpacity onPress={() => setShowPostModal(false)}>
-                <X size={24} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalBody}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Post Details *</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  placeholder="Enter post details..."
-                  value={postInfo.postDetails}
-                  onChangeText={(text) => setPostInfo(prev => ({ ...prev, postDetails: text }))}
-                  multiline
-                  numberOfLines={4}
-                />
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <View style={[styles.modalIcon, { backgroundColor: '#8b5cf620' }]}>
+                  <MessageSquare size={24} color="#8b5cf6" />
+                </View>
+                <Text style={styles.modalTitle}>Add New Post</Text>
+                <TouchableOpacity 
+                  style={styles.modalClose}
+                  onPress={() => setShowPostModal(false)}
+                >
+                  <X size={24} color="#9ca3af" />
+                </TouchableOpacity>
               </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Comments (Optional)</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  placeholder="Add comments..."
-                  value={postInfo.comments}
-                  onChangeText={(text) => setPostInfo(prev => ({ ...prev, comments: text }))}
-                  multiline
-                  numberOfLines={3}
-                />
-              </View>
-            </View>
+              <View style={styles.modalBody}>
+                <View style={styles.formGroup}>
+                  <Text style={styles.modalLabel}>Post Details *</Text>
+                  <TextInput
+                    style={[styles.modalInput, styles.modalTextArea]}
+                    placeholder="Enter post details..."
+                    placeholderTextColor="#9ca3af"
+                    value={postInfo.postDetails}
+                    onChangeText={(text) => setPostInfo(prev => ({ ...prev, postDetails: text }))}
+                    multiline
+                    numberOfLines={4}
+                  />
+                </View>
 
-            <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={styles.modalButtonSecondary}
-                onPress={() => setShowPostModal(false)}
-              >
-                <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButtonPrimary, { backgroundColor: '#8b5cf6' }, saving && styles.modalButtonDisabled]}
-                onPress={savePost}
-                disabled={saving}
-              >
-                {saving ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text style={styles.modalButtonPrimaryText}>Save Post</Text>
-                )}
-              </TouchableOpacity>
+                <View style={styles.formGroup}>
+                  <Text style={styles.modalLabel}>Comments (Optional)</Text>
+                  <TextInput
+                    style={[styles.modalInput, styles.modalTextArea]}
+                    placeholder="Add comments..."
+                    placeholderTextColor="#9ca3af"
+                    value={postInfo.comments}
+                    onChangeText={(text) => setPostInfo(prev => ({ ...prev, comments: text }))}
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButtonSecondary}
+                  onPress={() => setShowPostModal(false)}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButtonPrimary, { backgroundColor: '#8b5cf6' }, saving && styles.modalButtonDisabled]}
+                  onPress={savePost}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text style={styles.modalButtonPrimaryText}>Save Post</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -980,128 +1061,174 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  content: {
-    padding: 16,
-  },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  backButton: {
-    fontSize: 16,
-    color: '#3b82f6',
-    fontWeight: '600',
-  },
-  section: {
     backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  sectionHeader: {
+  headerTop: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
   },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f3f4f6',
     justifyContent: 'center',
-    marginRight: 12,
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 18,
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#1f2937',
   },
-  sectionSubtitle: {
+  headerSubtitle: {
     fontSize: 14,
     color: '#6b7280',
-    marginTop: 2,
+    marginTop: 4,
   },
-  sectionActions: {
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  cardHeader: {
+    flexDirection: "column",
+    alignItems: 'center',
+    justifyContent: "center",
+    marginBottom: 24,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  cardIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  cardHeaderContent: {
+    flexDirection: "column",
+    alignItems: 'center',
+    justifyContent: "center",
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  cardActions: {
     flexDirection: 'row',
-    marginLeft: 'auto',
     gap: 8,
+    marginTop: 15
   },
-  actionButton: {
+  cardActionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#10b981',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 6,
+    shadowColor: '#10b981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  actionButtonDisabled: {
-    backgroundColor: '#9ca3af',
+  cardActionButtonDisabled: {
+    backgroundColor: '#d1d5db',
+    shadowColor: '#9ca3af',
   },
-  actionButtonText: {
+  cardActionButtonText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
-  inputGroup: {
+  formGroup: {
     marginBottom: 20,
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4b5563',
-    marginBottom: 8,
+    color: '#374151',
+  },
+  row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    marginHorizontal: -4,
+  },
+  inputContainer: {
+    position: 'relative',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
-    backgroundColor: 'white',
+    color: '#1f2937',
+    backgroundColor: '#f9fafb',
   },
   inputError: {
     borderColor: '#ef4444',
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
+    backgroundColor: '#fef2f2',
   },
   clearButton: {
     position: 'absolute',
-    right: 14,
-    top: 14,
+    right: 12,
+    top: 12,
+    zIndex: 1,
   },
   suggestionsContainer: {
     marginTop: 8,
     maxHeight: 200,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#e5e7eb',
     backgroundColor: 'white',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 4,
+    overflow: 'hidden',
   },
   suggestionsList: {
     maxHeight: 200,
@@ -1117,122 +1244,197 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   profileThumb: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   placeholderThumb: {
     backgroundColor: '#f3f4f6',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
   },
   groupThumb: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#f0fdf4',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#dcfce7',
   },
   suggestionText: {
     flex: 1,
   },
   suggestionName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#1f2937',
+    marginBottom: 2,
+  },
+  suggestionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   suggestionId: {
     fontSize: 12,
     color: '#6b7280',
-    marginTop: 2,
   },
   suggestionPhone: {
     fontSize: 12,
     color: '#6b7280',
-    marginTop: 2,
   },
   suggestionNote: {
     fontSize: 12,
     color: '#6b7280',
-    marginTop: 2,
     fontStyle: 'italic',
+  },
+  suggestionArrow: {
+    opacity: 0.6,
+  },
+  errorContainer: {
+    marginTop: 6,
+    paddingLeft: 4,
   },
   errorText: {
     fontSize: 12,
     color: '#ef4444',
-    marginTop: 4,
+  },
+  textArea: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+    paddingTop: 14,
   },
   imagePicker: {
-    borderWidth: 2,
-    borderColor: '#d1d5db',
-    borderStyle: 'dashed',
     borderRadius: 12,
-    height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    borderStyle: 'dashed',
+  },
+  imagePreviewContainer: {
+    position: 'relative',
   },
   imagePreview: {
     width: '100%',
-    height: '100%',
-    borderRadius: 10,
+    height: 150,
   },
-  imagePlaceholder: {
+  imageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
   },
-  imagePlaceholderText: {
-    color: '#6b7280',
+  imageOverlayText: {
+    color: 'white',
     fontSize: 14,
+    fontWeight: '600',
+  },
+  imagePlaceholder: {
+    height: 150,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    gap: 8,
+  },
+  imagePlaceholderText: {
+    fontSize: 16,
+    color: '#4b5563',
+    fontWeight: '500',
+  },
+  imagePlaceholderSubtext: {
+    fontSize: 12,
+    color: '#9ca3af',
   },
   postsContainer: {
     marginTop: 20,
     padding: 16,
     backgroundColor: '#f9fafb',
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  postsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   postsTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: '#374151',
-    marginBottom: 12,
+  },
+  postsCount: {
+    backgroundColor: '#8b5cf6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
+    minWidth: 24,
+    alignItems: 'center',
+  },
+  postsCountText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
   },
   postItem: {
     backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
   postDetails: {
     fontSize: 14,
     color: '#1f2937',
-    marginBottom: 4,
+    lineHeight: 20,
+    marginBottom: 6,
   },
   postComments: {
     fontSize: 13,
     color: '#6b7280',
     fontStyle: 'italic',
-    marginBottom: 4,
+    marginBottom: 6,
+    lineHeight: 18,
   },
   postDate: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#9ca3af',
+    textAlign: 'right',
   },
   submitButton: {
-    backgroundColor: '#3b82f6',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: '#8b5cf6',
+    borderRadius: 14,
+    padding: 18,
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   submitButtonDisabled: {
-    backgroundColor: '#93c5fd',
+    backgroundColor: '#a78bfa',
+    shadowColor: '#a78bfa',
   },
   submitButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  footerSpacer: {
+    height: 40,
   },
   modalOverlay: {
     flex: 1,
@@ -1241,28 +1443,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
+  modalContainer: {
     width: '100%',
     maxWidth: 500,
     maxHeight: '80%',
   },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+  },
   modalHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#f3f4f6',
+    backgroundColor: '#fafafa',
+  },
+  modalIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#10b98120',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#1f2937',
+    flex: 1,
+  },
+  modalClose: {
+    padding: 4,
   },
   modalBody: {
     padding: 20,
+  },
+  modalLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  modalInput: {
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    color: '#1f2937',
+    backgroundColor: '#f9fafb',
+  },
+  modalTextArea: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+    paddingTop: 14,
   },
   modalFooter: {
     flexDirection: 'row',
@@ -1271,13 +1514,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#f3f4f6',
     gap: 12,
+    backgroundColor: '#fafafa',
   },
   modalButtonSecondary: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1.5,
     borderColor: '#d1d5db',
+    backgroundColor: 'white',
   },
   modalButtonSecondaryText: {
     color: '#6b7280',
@@ -1287,11 +1532,17 @@ const styles = StyleSheet.create({
   modalButtonPrimary: {
     backgroundColor: '#10b981',
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 10,
+    shadowColor: '#10b981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   modalButtonDisabled: {
     backgroundColor: '#9ca3af',
+    shadowColor: '#9ca3af',
   },
   modalButtonPrimaryText: {
     color: 'white',
