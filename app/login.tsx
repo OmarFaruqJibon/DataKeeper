@@ -178,7 +178,7 @@ export default function LoginScreen() {
           {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              © {new Date().getFullYear()} Data Collector Pro
+              © {new Date().getFullYear()} Data Collector
             </Text>
             <Text style={styles.versionText}>v1.0.0</Text>
           </View>

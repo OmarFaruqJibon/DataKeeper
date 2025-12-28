@@ -1,12 +1,9 @@
 // services/api.ts
 import axios from 'axios';
-import API_ENDPOINTS from '../config';
+import { API_BASE_URL, API_ENDPOINTS } from '../config';
 
 const api = axios.create({
-  baseURL: "http://10.0.2.2/data", 
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: API_BASE_URL,
 });
 
 api.interceptors.request.use(
@@ -125,14 +122,18 @@ export const postService = {
 
 export const dataService = {
   saveData: async (formData: FormData) => {
-    const response = await api.post(API_ENDPOINTS.SAVE_DATA, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.post(API_ENDPOINTS.SAVE_DATA, formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Accept: 'application/json',
+        },
+      }
+    );
     return response.data;
   },
 };
+
 
 export const statisticsService = {
   getOverview: async (userId: string) => {
@@ -141,14 +142,14 @@ export const statisticsService = {
     });
     return response.data;
   },
-  
+
   getMonthlyData: async (userId: string, period: string) => {
     const response = await api.get(API_ENDPOINTS.STATISISTICS_MONTHLY, {
       params: { userId, period },
     });
     return response.data;
   },
-  
+
   getDemographics: async (userId: string) => {
     const response = await api.get(API_ENDPOINTS.STATISISTICS_DEMOGRAPHICS, {
       params: { userId },

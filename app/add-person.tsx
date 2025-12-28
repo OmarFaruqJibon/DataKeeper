@@ -177,7 +177,6 @@ export default function AddPersonScreen() {
       age: person.age || '',
     });
 
-    // Set profile preview if exists
     if (person.profile_pic_url) {
       setProfilePreview(person.profile_pic_url);
     }
@@ -244,110 +243,127 @@ export default function AddPersonScreen() {
   };
 
   // Pick image from gallery
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
+const pickImage = async () => {
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'], 
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.8,
+  });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      // Create a File object for FormData
-      const response = await fetch(result.assets[0].uri);
-      const blob = await response.blob();
-      const file = new File([blob], 'profile.jpg', { type: blob.type });
-      setProfileImage(file);
-      setProfilePreview(result.assets[0].uri);
-    }
-  };
+  if (!result.canceled) {
+    setImage(result.assets[0].uri);
+    
+    const uri = result.assets[0].uri;
+    const filename = uri.split('/').pop() || 'profile.jpg';
+    const fileType = result.assets[0].mimeType || 'image/jpeg';
+    
+    // Create the object structure React Native FormData expects
+    const fileObject = {
+      uri,
+      name: filename,
+      type: fileType,
+    };
+    
+    setProfileImage(fileObject as any);
+    setProfilePreview(uri);
+  }
+};
 
   // Save group
-  const saveGroup = async () => {
-    if (!groupInfo.groupName.trim()) {
-      Alert.alert('Error', 'Group name is required');
-      return;
-    }
+const saveGroup = async () => {
+  if (!groupInfo.groupName.trim()) {
+    Alert.alert('Error', 'Group name is required');
+    return;
+  }
 
-    const userId = await getUserId();
-    if (!userId) return;
+  const userId = await getUserId();
+  if (!userId) return;
 
-    setSaving(true);
+  setSaving(true);
 
-    try {
-      // If person doesn't exist yet, we need to save person first
-      if (!selectedPersonId) {
-        if (!personInfo.profileName.trim() || !personInfo.profileId.trim()) {
-          throw new Error('Please fill in Profile Name and Profile ID');
-        }
-
-        // Create FormData for new person + group
-        const formData = new FormData();
-        formData.append('userId', userId);
-        formData.append('profile_name', personInfo.profileName);
-        formData.append('profile_id', personInfo.profileId);
-        formData.append('phone_number', personInfo.phoneNumber || '');
-        formData.append('address', personInfo.address || '');
-        formData.append('occupation', personInfo.occupation || '');
-        formData.append('age', personInfo.age || '');
-        formData.append('group_name', groupInfo.groupName.trim());
-        formData.append('note', groupInfo.note.trim() || '');
-        formData.append('post_details', 'auto-created');
-        formData.append('comments', '');
-
-        if (profileImage) {
-          formData.append('profile_pic', profileImage as any);
-        }
-
-        const response = await dataService.saveData(formData);
-
-        if (response.success) {
-          setSelectedPersonId(response.personId);
-          setGroupInfo(prev => ({ ...prev, id: response.groupId }));
-
-          // Fetch updated groups
-          const groupsResponse = await personService.getGroups(response.personId, userId);
-          if (groupsResponse.success) {
-            setPersonGroups(groupsResponse.groups);
-          }
-
-          setShowGroupModal(false);
-          Alert.alert('Success', 'Person and group saved successfully!');
-        } else {
-          throw new Error(response.error || 'Failed to save');
-        }
-      } else {
-        // For existing person, save just the group
-        const response = await groupService.createGroup(
-          selectedPersonId,
-          groupInfo.groupName,
-          userId,
-          groupInfo.note
-        );
-
-        if (response.success) {
-          const newGroup = response.group;
-          setPersonGroups(prev => [...prev, newGroup]);
-          setGroupInfo({
-            id: newGroup.id,
-            groupName: newGroup.group_name,
-            note: newGroup.note || '',
-          });
-
-          setShowGroupModal(false);
-          Alert.alert('Success', 'Group saved successfully!');
-        } else {
-          throw new Error(response.error || 'Failed to save group');
-        }
+  try {
+    if (!selectedPersonId) {
+      if (!personInfo.profileName.trim() || !personInfo.profileId.trim()) {
+        throw new Error('Please fill in Profile Name and Profile ID');
       }
-    } catch (error) {
-      console.error('Save error:', error);
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save');
-    } finally {
-      setSaving(false);
+
+      // Create FormData correctly for React Native
+      const formData = new FormData();
+      
+      // Append all text fields
+      formData.append('userId', userId);
+      formData.append('profile_name', personInfo.profileName);
+      formData.append('profile_id', personInfo.profileId);
+      formData.append('phone_number', personInfo.phoneNumber || '');
+      formData.append('address', personInfo.address || '');
+      formData.append('occupation', personInfo.occupation || '');
+      formData.append('age', personInfo.age || '');
+      formData.append('group_name', groupInfo.groupName.trim());
+      formData.append('note', groupInfo.note.trim() || '');
+      formData.append('post_details', 'auto-created');
+      formData.append('comments', '');
+
+      if (profileImage) {
+        const filename = profileImage.name || 'profile.jpg';
+        const fileType = profileImage.type || 'image/jpeg';
+        
+        // In React Native, use the object format
+        formData.append('profile_pic', {
+          uri: image, // Use the URI from state
+          name: filename,
+          type: fileType,
+        } as any);
+      }
+
+      const response = await dataService.saveData(formData);
+
+      if (response.success) {
+        setSelectedPersonId(response.personId);
+        setGroupInfo(prev => ({ ...prev, id: response.groupId }));
+
+        // Fetch updated groups
+        const groupsResponse = await personService.getGroups(response.personId, userId);
+        if (groupsResponse.success) {
+          setPersonGroups(groupsResponse.groups);
+        }
+
+        setShowGroupModal(false);
+        Alert.alert('Success', 'Person and group saved successfully!');
+      } else {
+        throw new Error(response.error || 'Failed to save');
+      }
+    } else {
+      // For existing person, save just the group
+      const response = await groupService.createGroup(
+        selectedPersonId,
+        groupInfo.groupName,
+        userId,
+        groupInfo.note
+      );
+
+      if (response.success) {
+        const newGroup = response.group;
+        setPersonGroups(prev => [...prev, newGroup]);
+        setGroupInfo({
+          id: newGroup.id,
+          groupName: newGroup.group_name,
+          note: newGroup.note || '',
+        });
+
+        setShowGroupModal(false);
+        Alert.alert('Success', 'Group saved successfully!');
+      } else {
+        throw new Error(response.error || 'Failed to save group');
+      }
     }
-  };
+  } catch (error) {
+    console.error('Save error:', error);
+    Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save');
+  } finally {
+    setSaving(false);
+  }
+};
 
   // Save post
   const savePost = async () => {
@@ -1063,7 +1079,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'white',
-    paddingTop:  20,
+    paddingTop:  50,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 24,
