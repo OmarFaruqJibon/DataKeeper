@@ -8,13 +8,14 @@ import {
   Alert,
   FlatList,
   Image,
+  LogBox,
   Modal,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { dataService, groupService, personService, postService } from '../services/api';
 
@@ -243,127 +244,125 @@ export default function AddPersonScreen() {
   };
 
   // Pick image from gallery
-const pickImage = async () => {
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ['images'], 
-    allowsEditing: true,
-    aspect: [1, 1],
-    quality: 0.8,
-  });
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
 
-  if (!result.canceled) {
-    setImage(result.assets[0].uri);
-    
-    const uri = result.assets[0].uri;
-    const filename = uri.split('/').pop() || 'profile.jpg';
-    const fileType = result.assets[0].mimeType || 'image/jpeg';
-    
-    // Create the object structure React Native FormData expects
-    const fileObject = {
-      uri,
-      name: filename,
-      type: fileType,
-    };
-    
-    setProfileImage(fileObject as any);
-    setProfilePreview(uri);
-  }
-};
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+
+      const uri = result.assets[0].uri;
+      const filename = uri.split('/').pop() || 'profile.jpg';
+      const fileType = result.assets[0].mimeType || 'image/jpeg';
+
+      // Create the object structure React Native FormData expects
+      const fileObject = {
+        uri,
+        name: filename,
+        type: fileType,
+      };
+
+      setProfileImage(fileObject as any);
+      setProfilePreview(uri);
+    }
+  };
 
   // Save group
-const saveGroup = async () => {
-  if (!groupInfo.groupName.trim()) {
-    Alert.alert('Error', 'Group name is required');
-    return;
-  }
+  const saveGroup = async () => {
+    if (!groupInfo.groupName.trim()) {
+      Alert.alert('Error', 'Group name is required');
+      return;
+    }
 
-  const userId = await getUserId();
-  if (!userId) return;
+    const userId = await getUserId();
+    if (!userId) return;
 
-  setSaving(true);
+    setSaving(true);
 
-  try {
-    if (!selectedPersonId) {
-      if (!personInfo.profileName.trim() || !personInfo.profileId.trim()) {
-        throw new Error('Please fill in Profile Name and Profile ID');
-      }
-
-      // Create FormData correctly for React Native
-      const formData = new FormData();
-      
-      // Append all text fields
-      formData.append('userId', userId);
-      formData.append('profile_name', personInfo.profileName);
-      formData.append('profile_id', personInfo.profileId);
-      formData.append('phone_number', personInfo.phoneNumber || '');
-      formData.append('address', personInfo.address || '');
-      formData.append('occupation', personInfo.occupation || '');
-      formData.append('age', personInfo.age || '');
-      formData.append('group_name', groupInfo.groupName.trim());
-      formData.append('note', groupInfo.note.trim() || '');
-      formData.append('post_details', 'auto-created');
-      formData.append('comments', '');
-
-      if (profileImage) {
-        const filename = profileImage.name || 'profile.jpg';
-        const fileType = profileImage.type || 'image/jpeg';
-        
-        // In React Native, use the object format
-        formData.append('profile_pic', {
-          uri: image, // Use the URI from state
-          name: filename,
-          type: fileType,
-        } as any);
-      }
-
-      const response = await dataService.saveData(formData);
-
-      if (response.success) {
-        setSelectedPersonId(response.personId);
-        setGroupInfo(prev => ({ ...prev, id: response.groupId }));
-
-        // Fetch updated groups
-        const groupsResponse = await personService.getGroups(response.personId, userId);
-        if (groupsResponse.success) {
-          setPersonGroups(groupsResponse.groups);
+    try {
+      if (!selectedPersonId) {
+        if (!personInfo.profileName.trim() || !personInfo.profileId.trim()) {
+          throw new Error('Please fill in Profile Name and Profile ID');
         }
 
-        setShowGroupModal(false);
-        Alert.alert('Success', 'Person and group saved successfully!');
-      } else {
-        throw new Error(response.error || 'Failed to save');
-      }
-    } else {
-      // For existing person, save just the group
-      const response = await groupService.createGroup(
-        selectedPersonId,
-        groupInfo.groupName,
-        userId,
-        groupInfo.note
-      );
+        const formData = new FormData();
 
-      if (response.success) {
-        const newGroup = response.group;
-        setPersonGroups(prev => [...prev, newGroup]);
-        setGroupInfo({
-          id: newGroup.id,
-          groupName: newGroup.group_name,
-          note: newGroup.note || '',
-        });
+        // Append all text fields
+        formData.append('userId', userId);
+        formData.append('profile_name', personInfo.profileName);
+        formData.append('profile_id', personInfo.profileId);
+        formData.append('phone_number', personInfo.phoneNumber || '');
+        formData.append('address', personInfo.address || '');
+        formData.append('occupation', personInfo.occupation || '');
+        formData.append('age', personInfo.age || '');
+        formData.append('group_name', groupInfo.groupName.trim());
+        formData.append('note', groupInfo.note.trim() || '');
+        formData.append('post_details', 'auto-created');
+        formData.append('comments', '');
 
-        setShowGroupModal(false);
-        Alert.alert('Success', 'Group saved successfully!');
+        if (profileImage) {
+          const filename = profileImage.name || 'profile.jpg';
+          const fileType = profileImage.type || 'image/jpeg';
+
+          formData.append('profile_pic', {
+            uri: image,
+            name: filename,
+            type: fileType,
+          } as any);
+        }
+
+        const response = await dataService.saveData(formData);
+
+        if (response.success) {
+          setSelectedPersonId(response.personId);
+          setGroupInfo(prev => ({ ...prev, id: response.groupId }));
+
+          // Fetch updated groups
+          const groupsResponse = await personService.getGroups(response.personId, userId);
+          if (groupsResponse.success) {
+            setPersonGroups(groupsResponse.groups);
+          }
+
+          setShowGroupModal(false);
+          Alert.alert('Success', 'Person and group saved successfully!');
+        } else {
+          throw new Error(response.error || 'Failed to save');
+        }
       } else {
-        throw new Error(response.error || 'Failed to save group');
+        // For existing person, save just the group
+        const response = await groupService.createGroup(
+          selectedPersonId,
+          groupInfo.groupName,
+          userId,
+          groupInfo.note
+        );
+
+        if (response.success) {
+          const newGroup = response.group;
+          setPersonGroups(prev => [...prev, newGroup]);
+          setGroupInfo({
+            id: newGroup.id,
+            groupName: newGroup.group_name,
+            note: newGroup.note || '',
+          });
+
+          setShowGroupModal(false);
+          Alert.alert('Success', 'Group saved successfully!');
+        } else {
+          throw new Error(response.error || 'Failed to save group');
+        }
       }
+    } catch (error) {
+      console.error('Save error:', error);
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save');
+    } finally {
+      setSaving(false);
     }
-  } catch (error) {
-    console.error('Save error:', error);
-    Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save');
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
   // Save post
   const savePost = async () => {
@@ -565,12 +564,16 @@ const saveGroup = async () => {
     </TouchableOpacity>
   );
 
+  useEffect(() => {
+    LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
           >
@@ -584,10 +587,11 @@ const saveGroup = async () => {
         </View>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={true}
       >
         {/* Person Information Card */}
         <View style={styles.card}>
@@ -636,7 +640,7 @@ const saveGroup = async () => {
                 </TouchableOpacity>
               )}
             </View>
-            
+
             {/* Person Suggestions */}
             {showPersonSuggestions && personSuggestions.length > 0 && (
               <View style={styles.suggestionsContainer}>
@@ -644,13 +648,14 @@ const saveGroup = async () => {
                   data={personSuggestions}
                   renderItem={renderPersonSuggestion}
                   keyExtractor={(item) => item.id}
-                  style={styles.suggestionsList}
-                  nestedScrollEnabled
+                  style={[styles.suggestionsList, { maxHeight: 280 }]}
+                  scrollEnabled={false} 
+                  nestedScrollEnabled={true}
                   showsVerticalScrollIndicator={false}
                 />
               </View>
             )}
-            
+
             {errors.profileName && (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{errors.profileName}</Text>
@@ -679,7 +684,6 @@ const saveGroup = async () => {
             )}
           </View>
 
-          {/* Two Column Layout for Phone and Age */}
           <View style={styles.row}>
             <View style={[styles.formGroup, { flex: 1, marginRight: 8 }]}>
               <View style={styles.labelContainer}>
@@ -748,16 +752,16 @@ const saveGroup = async () => {
               <Camera size={16} color="#8b5cf6" />
               <Text style={styles.label}>Profile Picture</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.imagePicker} 
+            <TouchableOpacity
+              style={styles.imagePicker}
               onPress={pickImage}
               activeOpacity={0.7}
             >
               {profilePreview ? (
                 <View style={styles.imagePreviewContainer}>
-                  <Image 
-                    source={{ uri: profilePreview }} 
-                    style={styles.imagePreview} 
+                  <Image
+                    source={{ uri: profilePreview }}
+                    style={styles.imagePreview}
                   />
                   <View style={styles.imageOverlay}>
                     <Camera size={20} color="white" />
@@ -780,7 +784,7 @@ const saveGroup = async () => {
           <View style={styles.cardHeader}>
             <View style={[styles.cardIcon, { backgroundColor: '#10b981' }]}>
               <Users size={20} color="white" />
-              
+
             </View>
             <View style={styles.cardHeaderContent}>
               <Text style={styles.cardTitle}>Group Information</Text>
@@ -839,8 +843,9 @@ const saveGroup = async () => {
                   data={groupSuggestions}
                   renderItem={renderGroupSuggestion}
                   keyExtractor={(item) => item.id}
-                  style={styles.suggestionsList}
-                  nestedScrollEnabled
+                  style={[styles.suggestionsList, { maxHeight: 210 }]}
+                  scrollEnabled={false}
+                  nestedScrollEnabled={true}
                   showsVerticalScrollIndicator={false}
                 />
               </View>
@@ -894,6 +899,7 @@ const saveGroup = async () => {
                 )}
                 keyExtractor={(item) => item.id}
                 scrollEnabled={false}
+                style={{ maxHeight: 300 }}
               />
             </View>
           )}
@@ -933,7 +939,7 @@ const saveGroup = async () => {
                   <Users size={24} color="#10b981" />
                 </View>
                 <Text style={styles.modalTitle}>Create New Group</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.modalClose}
                   onPress={() => setShowGroupModal(false)}
                 >
@@ -1009,7 +1015,7 @@ const saveGroup = async () => {
                   <MessageSquare size={24} color="#8b5cf6" />
                 </View>
                 <Text style={styles.modalTitle}>Add New Post</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.modalClose}
                   onPress={() => setShowPostModal(false)}
                 >
@@ -1079,7 +1085,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'white',
-    paddingTop:  50,
+    paddingTop: 50,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 24,
@@ -1234,7 +1240,7 @@ const styles = StyleSheet.create({
   },
   suggestionsContainer: {
     marginTop: 8,
-    maxHeight: 200,
+    maxHeight: 280,
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#e5e7eb',
@@ -1245,9 +1251,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
     overflow: 'hidden',
+
   },
   suggestionsList: {
-    maxHeight: 200,
+    // maxHeight: 200,
   },
   suggestionItem: {
     padding: 12,
