@@ -132,7 +132,6 @@ export default function StatisticsScreen() {
             console.error('Statistics load error:', error);
             setError(error.message || 'Failed to load statistics');
 
-            // Set mock data for development
             setStatData(getMockData());
         } finally {
             setLoading(false);
@@ -448,11 +447,6 @@ export default function StatisticsScreen() {
                             </View>
                             <Text style={styles.sectionTitle}>Recent Activity</Text>
                         </View>
-                        {/* {statData.recentActivity && statData.recentActivity.length > 0 && (
-                            <TouchableOpacity activeOpacity={0.7}>
-                                <Text style={styles.seeAllText}>See All</Text>
-                            </TouchableOpacity>
-                        )} */}
                     </View>
 
                     <View style={styles.activityContainer}>

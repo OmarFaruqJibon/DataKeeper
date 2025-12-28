@@ -44,15 +44,12 @@ export default function DashboardScreen() {
     loadDashboardData();
   }, []);
 
-  // Update the filtering logic
   useEffect(() => {
     if (searchQuery.trim() === '') {
-      // No search query
+
       if (showAll) {
-        // Show all persons
         setFilteredPersons(allPersons);
       } else {
-        // Show only recent persons
         setFilteredPersons(allPersons.slice(0, 5));
       }
     } else {
@@ -266,13 +263,6 @@ export default function DashboardScreen() {
             <TouchableOpacity
               style={styles.actionCard}
               onPress={() => router.push('/statistics')}
-              // onPress={() =>
-              //   Alert.alert(
-              //     'Coming Soon',
-              //     'This feature will come soon.',
-              //     [{ text: 'OK' }]
-              //   )
-              // }
             >
               <View style={[styles.actionIconContainer, { backgroundColor: '#10b98120' }]}>
                 <BarChart3 size={24} color="#10b981" />

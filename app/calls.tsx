@@ -91,7 +91,7 @@ export default function CallsScreen() {
         Alert.alert('Success', 'Call added successfully');
         setCallMessage('');
         setNote('');
-        loadCalls(); // Refresh list
+        loadCalls();
       } else {
         Alert.alert('Error', response.error || 'Failed to add call');
       }

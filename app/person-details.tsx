@@ -39,7 +39,6 @@ interface Call {
   note?: string;
   created_at: string;
 }
-// Replace your entire PersonDetailsScreen component with this cleaned up version:
 export default function PersonDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -61,7 +60,7 @@ export default function PersonDetailsScreen() {
         return;
       }
 
-      // Search for person
+      // Search person
       const response = await personService.search('', userId);
       if (response.success) {
         const foundPerson = response.persons.find((p: PersonDetails) => p.id.toString() === id);

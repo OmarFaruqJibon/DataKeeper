@@ -96,7 +96,7 @@ export default function PostsScreen() {
         Alert.alert('Success', 'Post added successfully');
         setPostDetails('');
         setComments('');
-        loadPosts(); // Refresh list
+        loadPosts();
       } else {
         Alert.alert('Error', 'Failed to add post');
       }

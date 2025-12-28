@@ -1,3 +1,4 @@
+// app/add-person.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -47,7 +48,6 @@ interface Post {
 export default function AddPersonScreen() {
   const router = useRouter();
 
-  // States
   const [loading, setLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -111,7 +111,7 @@ export default function AddPersonScreen() {
     }
   };
 
-  // Search for persons when profile name changes
+  // Search persons when profile name changes
   useEffect(() => {
     const searchPersons = async () => {
       if (personInfo.profileName.length < 2) {
@@ -138,7 +138,7 @@ export default function AddPersonScreen() {
     return () => clearTimeout(debounceTimer);
   }, [personInfo.profileName]);
 
-  // Search for groups when group name changes
+  // Search groups when group name changes
   useEffect(() => {
     const searchGroups = async () => {
       if (!selectedPersonId || groupInfo.groupName.length < 2) {
@@ -391,7 +391,6 @@ export default function AddPersonScreen() {
       );
 
       if (response.success) {
-        // Add new post to existing posts
         const newPost: Post = {
           id: response.post?.id || Date.now().toString(),
           post_details: postInfo.postDetails,
