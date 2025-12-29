@@ -1,4 +1,0 @@
-# Allow access to profile pictures
-<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
-    Require all granted
-</FilesMatch>
