@@ -1,8 +1,8 @@
 // app/dashboard.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { BarChart3, Briefcase, Calendar, ChevronRight, Hash, LogOut, Phone, Plus, Search, User } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -40,9 +40,11 @@ export default function DashboardScreen() {
   const [showAll, setShowAll] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboardData();
+    }, [])
+  );
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -62,7 +64,9 @@ export default function DashboardScreen() {
     }
   }, [searchQuery, allPersons, showAll]);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
+    if (isRefresh) setRefreshing(true);
     try {
       const userId = await AsyncStorage.getItem('userId');
       if (!userId) {
@@ -101,8 +105,7 @@ export default function DashboardScreen() {
   };
 
   const onRefresh = () => {
-    setRefreshing(true);
-    loadDashboardData();
+    loadDashboardData(true);
   };
 
   const handleLogout = async () => {
@@ -240,7 +243,11 @@ export default function DashboardScreen() {
         style={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            enabled={!searchQuery}
+            colors={['#8b5cf6']} />
         }
       >
 

@@ -1,22 +1,23 @@
 // app/person-details.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Briefcase, Calendar, ChevronLeft, ChevronRight, Edit2, Hash, MapPin, Phone, PhoneCall, Plus, User, Users } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
   Image,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
-import { callService, personService } from '../services/api';
+import { callService, personService, postService } from '../services/api';
 
-interface PersonDetails {
+interface PersonDetails { 
   id: string;
   profile_name: string;
   profile_id: string;
@@ -39,20 +40,32 @@ interface Call {
   note?: string;
   created_at: string;
 }
+
 export default function PersonDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  
+
   const [loading, setLoading] = useState(true);
   const [person, setPerson] = useState<PersonDetails | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [calls, setCalls] = useState<Call[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [postCount, setPostCount] = useState(0); 
 
   useEffect(() => {
     loadPersonData();
   }, [id]);
 
-  const loadPersonData = async () => {
+  useFocusEffect(
+    useCallback(() => {
+      loadPersonData(true);
+    }, [id])
+  );
+
+  const loadPersonData = async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
+    if (isRefresh) setRefreshing(true);
+
     try {
       const userId = await AsyncStorage.getItem('userId');
       if (!userId) {
@@ -80,12 +93,44 @@ export default function PersonDetailsScreen() {
       if (callsResponse.success) {
         setCalls(callsResponse.calls);
       }
+
+      //  post count 
+      await loadPostCount(id as string, userId, groupsResponse.groups || []);
+
     } catch (error) {
       console.error('Load person data error:', error);
       Alert.alert('Error', 'Failed to load person data');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  // calculate total post count
+  const loadPostCount = async (personId: string, userId: string, groups: Group[]) => {
+    try {
+      let totalPosts = 0;
+      
+      if (!groups || groups.length === 0) {
+        setPostCount(0);
+        return;
+      }
+      for (const group of groups) {
+        const postsResponse = await postService.getPosts(personId, group.id, userId);
+        if (postsResponse.success && postsResponse.posts) {
+          totalPosts += postsResponse.posts.length;
+        }
+      }
+      
+      setPostCount(totalPosts);
+    } catch (error) {
+      console.error('Error loading post count:', error);
+      setPostCount(0);
+    }
+  };
+
+  const onRefresh = () => {
+    loadPersonData(true);
   };
 
   const handleAddCall = () => {
@@ -182,7 +227,7 @@ export default function PersonDetailsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
           activeOpacity={0.7}
@@ -192,7 +237,7 @@ export default function PersonDetailsScreen() {
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Profile Details</Text>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.editButton}
           onPress={handleEditPerson}
           activeOpacity={0.7}
@@ -201,9 +246,16 @@ export default function PersonDetailsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#8b5cf6']}
+          />
+        }
       >
         {/* Profile Card */}
         <View style={styles.profileCard}>
@@ -230,8 +282,7 @@ export default function PersonDetailsScreen() {
               </View>
             </View>
           </View>
-
-          {/* Stats */}
+          
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{groups.length}</Text>
@@ -244,7 +295,7 @@ export default function PersonDetailsScreen() {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>0</Text>
+              <Text style={styles.statValue}>{postCount}</Text>
               <Text style={styles.statLabel}>Posts</Text>
             </View>
           </View>
@@ -264,7 +315,7 @@ export default function PersonDetailsScreen() {
                   </View>
                 </View>
               )}
-              
+
               {person.age && (
                 <View style={styles.infoItem}>
                   <View style={[styles.infoIcon, { backgroundColor: '#8b5cf6' }]}>
@@ -276,7 +327,7 @@ export default function PersonDetailsScreen() {
                   </View>
                 </View>
               )}
-              
+
               {person.occupation && (
                 <View style={styles.infoItem}>
                   <View style={[styles.infoIcon, { backgroundColor: '#10b981' }]}>
@@ -288,7 +339,7 @@ export default function PersonDetailsScreen() {
                   </View>
                 </View>
               )}
-              
+
               {person.address && (
                 <View style={styles.infoItem}>
                   <View style={[styles.infoIcon, { backgroundColor: '#f59e0b' }]}>
@@ -385,7 +436,6 @@ export default function PersonDetailsScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -436,7 +486,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'white',
-    paddingTop:  50,
+    paddingTop: 50,
     paddingBottom: 20,
     paddingHorizontal: 20,
     flexDirection: 'row',

@@ -40,7 +40,10 @@ export default function PostsScreen() {
     loadPosts();
   }, [groupId, personId]);
 
-  const loadPosts = async () => {
+  const loadPosts = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+  else setLoading(true);
+  
     try {
       const userId = await AsyncStorage.getItem('userId');
       if (!userId) {
@@ -181,7 +184,7 @@ export default function PostsScreen() {
         style={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#8b5cf6']}/>
         }
       >
         {/* New Post Form */}

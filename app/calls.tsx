@@ -198,7 +198,7 @@ export default function CallsScreen() {
         style={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#8b5cf6']}/>
         }
       >
         {/* New Call Form */}
