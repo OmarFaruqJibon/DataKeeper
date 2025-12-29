@@ -1,8 +1,13 @@
+import { checkForApkUpdate } from "@/services/updateService";
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { PaperProvider } from 'react-native-paper';
 
 export default function RootLayout() {
+    useEffect(() => {
+    checkForApkUpdate();
+  }, []);
   return (
     <PaperProvider>
       <StatusBar

@@ -4,6 +4,15 @@
     "slug": "data-collector",
     "version": "1.0.0",
     "orientation": "portrait",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/2e7b0610-af63-4333-ad99-69e3f614b2e5"
+    },
     "icon": "./assets/images/icon.png",
     "scheme": "datacollector",
     "userInterfaceStyle": "automatic",
@@ -15,7 +24,6 @@
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
@@ -25,9 +33,14 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.INTERNET",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.omarfaruq73.datacollector"
+      "package": "com.omarfaruq73.datacollector",
+      "versionCode": 1
     },
     "web": {
       "output": "static",
