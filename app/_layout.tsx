@@ -1,3 +1,4 @@
+// app/_layout.tsx
 import { checkForApkUpdate } from "@/services/updateService";
 import { Stack } from "expo-router";
 import { useEffect } from "react";

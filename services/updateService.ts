@@ -1,3 +1,4 @@
+// services/updateService.ts
 import * as Application from 'expo-application';
 import { Alert, Linking, Platform } from 'react-native';
 
@@ -10,9 +11,12 @@ export async function checkForApkUpdate() {
     const res = await fetch(VERSION_URL);
     const data = await res.json();
 
-    const currentVersionCode = Number(
-      Application.nativeBuildVersion
+    const currentVersionCode = parseInt(
+      Application.nativeBuildVersion ?? '0',
+      10
     );
+
+    if (!currentVersionCode) return;
 
     if (data.versionCode > currentVersionCode) {
       Alert.alert(
