@@ -1,3 +1,4 @@
+// app.json
 {
   "expo": {
     "name": "data-collector",
@@ -28,18 +29,13 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      // "usesCleartextTraffic": true,
-      // "config": {
-      //   "cleartextTrafficPermitted": true
-      // },
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.INTERNET",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.omarfaruq73.datacollector",
-      "versionCode": 2
+      "package": "com.omarfaruq73.datacollector"
     },
     "web": {
       "output": "static",

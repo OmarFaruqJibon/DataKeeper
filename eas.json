@@ -1,3 +1,4 @@
+// eas.json
 {
   "cli": {
     "version": ">= 16.28.0",
@@ -15,7 +16,10 @@
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production"
+      "channel": "production",
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {

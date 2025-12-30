@@ -11,12 +11,12 @@ export async function checkForApkUpdate() {
     const res = await fetch(VERSION_URL);
     const data = await res.json();
 
-    const currentVersionCode = parseInt(
-      Application.nativeBuildVersion ?? '0',
-      10
-    );
+    const currentVersionCode = Number(
+      Application.nativeBuildVersion
 
-    if (!currentVersionCode) return;
+    );
+    console.log('version code:', currentVersionCode);
+    console.log('json version code:', data.versionCode);
 
     if (data.versionCode > currentVersionCode) {
       Alert.alert(
